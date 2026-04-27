@@ -6,11 +6,11 @@ const logger = require('../utils/logger');
 const { sequelize, Store, User, Product, Customer } = require('../models');
 const config = require('../config');
 
-(async () => {
-  try {
+async function runSeed({ skipSync = false } = {}) {
+  if (!skipSync) {
     await sequelize.sync({ alter: true });
-
-    const phone = '+919999999999';
+  }
+  const phone = '+919999999999';
     let store = await Store.findOne({ where: { phone } });
     if (!store) {
       store = await Store.create({
@@ -53,10 +53,17 @@ const config = require('../config');
       defaults: { storeId: store.id, name: 'Ramesh Kumar', phone: '+919876543210', creditLimit: 2000 },
     });
 
-    logger.info('✅ Seed complete. Login: phone=%s password=password123', phone);
-    process.exit(0);
-  } catch (err) {
-    logger.error('Seed failed: %s', err.stack || err.message);
-    process.exit(1);
-  }
-})();
+  logger.info('✅ Seed complete. Login: phone=%s password=password123', phone);
+  return { store, phone };
+}
+
+module.exports = { runSeed };
+
+if (require.main === module) {
+  runSeed()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      logger.error('Seed failed: %s', err.stack || err.message);
+      process.exit(1);
+    });
+}

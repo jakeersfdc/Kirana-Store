@@ -26,6 +26,19 @@ async function start() {
       logger.info('Models synced');
     }
 
+    // Auto-seed demo data on first boot when DB is empty
+    try {
+      const { Store } = require('./models');
+      const count = await Store.count();
+      if (count === 0) {
+        logger.info('Empty DB detected, seeding demo data...');
+        const { runSeed } = require('./scripts/seed');
+        await runSeed({ skipSync: true });
+      }
+    } catch (e) {
+      logger.error('Auto-seed failed: %s', e.stack || e.message);
+    }
+
     const server = app.listen(config.port, () => {
       logger.info('Kirana SaaS API listening on :%d (%s)', config.port, config.env);
     });

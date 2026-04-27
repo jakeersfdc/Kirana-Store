@@ -18,7 +18,7 @@
     },
     "web": { "bundler": "metro" },
     "extra": {
-      "API_URL": "http://192.168.1.9:4000"
+      "API_URL": "https://kirana-api-jex2.onrender.com"
     }
   }
 }
