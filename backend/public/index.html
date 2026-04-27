@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kirana SaaS — Console</title>
+<style>
+  :root {
+    --bg:#0f172a; --panel:#111827; --panel2:#1f2937; --line:#374151;
+    --text:#e5e7eb; --muted:#9ca3af; --brand:#10b981; --brand-2:#34d399;
+    --danger:#ef4444; --warn:#f59e0b;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+         background:var(--bg); color:var(--text); }
+  header { padding:16px 24px; background:var(--panel); border-bottom:1px solid var(--line);
+           display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  header h1 { font-size:18px; margin:0; }
+  header .meta { color:var(--muted); font-size:13px; }
+  main { display:grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 60px); }
+  nav { background:var(--panel); border-right:1px solid var(--line); padding:12px; }
+  nav button { display:block; width:100%; text-align:left; background:transparent; color:var(--text);
+               border:none; padding:10px 12px; border-radius:8px; cursor:pointer; margin:2px 0; font-size:14px; }
+  nav button:hover { background:var(--panel2); }
+  nav button.active { background:var(--brand); color:#06281b; font-weight:600; }
+  section { padding:24px; overflow:auto; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:16px; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; }
+  input, select, textarea, button {
+    font: inherit; color:var(--text); background:var(--panel2); border:1px solid var(--line);
+    border-radius:8px; padding:9px 11px;
+  }
+  input:focus, select:focus, textarea:focus { outline:2px solid var(--brand); }
+  button.primary { background:var(--brand); color:#06281b; border:0; font-weight:600; cursor:pointer; }
+  button.primary:hover { background:var(--brand-2); }
+  button.ghost { background:transparent; cursor:pointer; }
+  button.danger { background:var(--danger); border:0; color:white; cursor:pointer; }
+  table { width:100%; border-collapse: collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+  .kpi { display:grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
+  .kpi .box { background:var(--panel2); border-radius:10px; padding:14px; }
+  .kpi .box .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:0.5px; }
+  .kpi .box .val { font-size:24px; font-weight:700; margin-top:4px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; background:var(--panel2); border:1px solid var(--line); }
+  .pill.NEW { background:#1e3a8a; }
+  .pill.ACCEPTED { background:#065f46; }
+  .pill.OUT_FOR_DELIVERY { background:#92400e; }
+  .pill.DELIVERED { background:#064e3b; }
+  .pill.CANCELLED, .pill.REJECTED { background:#7f1d1d; }
+  label { display:block; font-size:12px; color:var(--muted); margin-bottom:4px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+  .grid3 { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; }
+  .muted { color: var(--muted); }
+  .toast { position:fixed; bottom:16px; right:16px; background:var(--panel); border:1px solid var(--line);
+           padding:12px 16px; border-radius:10px; max-width: 340px; }
+  .toast.err { border-color: var(--danger); }
+  .hidden { display:none !important; }
+  .auth-box { max-width:380px; margin:80px auto; }
+  .tabs { display:flex; gap:6px; margin-bottom:12px; }
+  .tabs button { background:var(--panel2); }
+  .tabs button.active { background:var(--brand); color:#06281b; font-weight:600; border:0; }
+  pre { background:#0b1220; padding:10px; border-radius:8px; overflow:auto; font-size:12px; }
+  .cart-row { display:grid; grid-template-columns: 2fr 1fr 80px; gap:8px; align-items:center; margin:4px 0; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN / REGISTER -->
+<div id="auth" class="auth-box">
+  <div class="card">
+    <h1 style="margin:0 0 12px">🛒 Kirana SaaS</h1>
+    <p class="muted" style="margin-top:0">Multi-tenant store management console</p>
+    <div class="tabs">
+      <button data-tab="login" class="active">Login</button>
+      <button data-tab="register">New Store</button>
+    </div>
+
+    <form id="form-login">
+      <label>Phone</label>
+      <input name="phone" value="+919999999999" required />
+      <label style="margin-top:10px">Password</label>
+      <input name="password" type="password" value="password123" required />
+      <button class="primary" style="margin-top:14px; width:100%">Log in</button>
+      <p class="muted" style="font-size:12px; margin-top:10px">Demo: <code>+919999999999</code> / <code>password123</code></p>
+    </form>
+
+    <form id="form-register" class="hidden">
+      <div class="grid2">
+        <div><label>Store name</label><input name="storeName" required /></div>
+        <div><label>Owner name</label><input name="ownerName" required /></div>
+        <div><label>Phone</label><input name="phone" placeholder="+91..." required /></div>
+        <div><label>Password</label><input name="password" type="password" required /></div>
+      </div>
+      <label style="margin-top:10px">Address</label>
+      <input name="address" />
+      <button class="primary" style="margin-top:14px; width:100%">Create store</button>
+    </form>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+  <header>
+    <div><h1>🛒 <span id="store-name">…</span></h1>
+      <div class="meta">Plan: <span id="store-plan"></span> · Owner: <span id="user-name"></span></div>
+    </div>
+    <button class="ghost" id="btn-logout">Log out ↪</button>
+  </header>
+  <main>
+    <nav>
+      <button data-view="dashboard" class="active">📊 Dashboard</button>
+      <button data-view="orders">📦 Orders</button>
+      <button data-view="new-order">➕ New Order</button>
+      <button data-view="products">🏷️ Products</button>
+      <button data-view="customers">👥 Customers</button>
+      <button data-view="deliveries">🚚 Deliveries</button>
+      <button data-view="insights">🧠 Insights</button>
+      <button data-view="subscription">💳 Subscription</button>
+    </nav>
+    <section id="view"></section>
+  </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const API = '/api/v1';
+let TOKEN = localStorage.getItem('kirana_token') || '';
+let STORE = JSON.parse(localStorage.getItem('kirana_store') || 'null');
+let USER  = JSON.parse(localStorage.getItem('kirana_user')  || 'null');
+
+function toast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.remove('hidden'); t.classList.toggle('err', err);
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.add('hidden'), 3500);
+}
+
+async function api(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers||{}) };
+  if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
+  const res = await fetch(API + path, { ...options, headers });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || json.success === false) {
+    const msg = json?.error?.message || res.statusText;
+    if (res.status === 401 && TOKEN) {
+      TOKEN=''; STORE=null; USER=null; localStorage.clear();
+      toast('Session expired, please log in again', true);
+      showAuth();
+    } else {
+      toast(msg, true);
+    }
+    throw new Error(msg);
+  }
+  return json.data;
+}
+
+function showApp() {
+  document.getElementById('auth').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('store-name').textContent = STORE?.name || '';
+  document.getElementById('store-plan').textContent = STORE?.subscriptionPlan || '';
+  document.getElementById('user-name').textContent = USER?.name || '';
+  route('dashboard');
+}
+function showAuth() {
+  document.getElementById('auth').classList.remove('hidden');
+  document.getElementById('app').classList.add('hidden');
+}
+
+// ---------- Auth ----------
+document.querySelectorAll('#auth .tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#auth .tabs button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  document.getElementById('form-login').classList.toggle('hidden', b.dataset.tab !== 'login');
+  document.getElementById('form-register').classList.toggle('hidden', b.dataset.tab !== 'register');
+});
+
+document.getElementById('form-login').onsubmit = async (e) => {
+  e.preventDefault();
+  const body = Object.fromEntries(new FormData(e.target));
+  try {
+    const data = await api('/auth/login', { method:'POST', body: JSON.stringify(body) });
+    TOKEN = data.token; STORE = data.store; USER = data.user;
+    localStorage.setItem('kirana_token', TOKEN);
+    localStorage.setItem('kirana_store', JSON.stringify(STORE));
+    localStorage.setItem('kirana_user',  JSON.stringify(USER));
+    showApp();
+  } catch {}
+};
+
+document.getElementById('form-register').onsubmit = async (e) => {
+  e.preventDefault();
+  const body = Object.fromEntries(new FormData(e.target));
+  try {
+    const data = await api('/auth/register', { method:'POST', body: JSON.stringify(body) });
+    TOKEN = data.token; STORE = data.store; USER = data.user;
+    localStorage.setItem('kirana_token', TOKEN);
+    localStorage.setItem('kirana_store', JSON.stringify(STORE));
+    localStorage.setItem('kirana_user',  JSON.stringify(USER));
+    showApp();
+    toast('Store created! 🎉');
+  } catch {}
+};
+
+document.getElementById('btn-logout').onclick = () => {
+  TOKEN=''; STORE=null; USER=null;
+  localStorage.clear(); showAuth();
+};
+
+// ---------- Router ----------
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => route(b.dataset.view));
+function route(view) {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x.dataset.view === view));
+  const v = document.getElementById('view');
+  v.innerHTML = `<div class="muted">Loading…</div>`;
+  views[view](v).catch(e => v.innerHTML = `<div class="card">❌ ${e.message}</div>`);
+}
+
+// ---------- Views ----------
+const views = {};
+const rupee = (n) => '₹' + Number(n||0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const dtf = (d) => d ? new Date(d).toLocaleString() : '-';
+
+views.dashboard = async (el) => {
+  const d = await api('/insights/dashboard').catch(()=>null);
+  if (!d) {
+    el.innerHTML = `<div class="card">Analytics requires GROWTH or PREMIUM plan. <a href="#" id="go-sub">Upgrade →</a></div>`;
+    document.getElementById('go-sub').onclick = (e)=>{e.preventDefault(); route('subscription');};
+    return;
+  }
+  const t = d.today.totals, w = d.last7Days.totals;
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">Today</h2>
+      <div class="kpi">
+        <div class="box"><div class="label">Orders</div><div class="val">${t.orderCount||0}</div></div>
+        <div class="box"><div class="label">Revenue</div><div class="val">${rupee(t.revenue)}</div></div>
+        <div class="box"><div class="label">Avg order</div><div class="val">${rupee(t.avgOrderValue)}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2 style="margin:0 0 10px">Last 7 days</h2>
+      <div class="kpi">
+        <div class="box"><div class="label">Orders</div><div class="val">${w.orderCount||0}</div></div>
+        <div class="box"><div class="label">Revenue</div><div class="val">${rupee(w.revenue)}</div></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="card"><h3>🔥 Top products (7d)</h3>
+        <table><thead><tr><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead><tbody>
+        ${(d.topProducts||[]).map(p=>`<tr><td>${p.productName}</td><td>${p.totalQty}</td><td>${rupee(p.totalRevenue)}</td></tr>`).join('') || '<tr><td colspan=3 class=muted>No sales yet</td></tr>'}
+        </tbody></table>
+      </div>
+      <div class="card"><h3>⚠️ Low stock</h3>
+        <table><thead><tr><th>Product</th><th>Stock</th><th>Threshold</th></tr></thead><tbody>
+        ${(d.lowStock||[]).map(p=>`<tr><td>${p.name}</td><td>${p.stock} ${p.unit}</td><td>${p.lowStockThreshold}</td></tr>`).join('') || '<tr><td colspan=3 class=muted>All products well-stocked</td></tr>'}
+        </tbody></table>
+      </div>
+    </div>`;
+};
+
+views.products = async (el) => {
+  const { items } = await api('/products');
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">Products</h2>
+      <form id="p-form" class="grid3" style="margin-bottom:12px">
+        <div><label>Name</label><input name="name" required /></div>
+        <div><label>Category</label><input name="category" /></div>
+        <div><label>Unit</label><input name="unit" value="pcs" /></div>
+        <div><label>Price</label><input name="price" type="number" step="0.01" required /></div>
+        <div><label>Stock</label><input name="stock" type="number" step="0.001" value="0" /></div>
+        <div style="display:flex; align-items:end"><button class="primary" style="width:100%">Add product</button></div>
+      </form>
+      <table><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th></th></tr></thead>
+      <tbody>${items.map(p=>`
+        <tr><td>${p.name}</td><td>${p.category||'-'}</td><td>${rupee(p.price)}</td>
+        <td>${p.stock} ${p.unit}</td>
+        <td><input data-id="${p.id}" class="adj" placeholder="+10 / -2" style="width:90px" />
+        <button class="ghost" data-adj="${p.id}">Adjust</button></td></tr>`).join('')}
+      </tbody></table>
+    </div>`;
+  document.getElementById('p-form').onsubmit = async e => {
+    e.preventDefault();
+    const b = Object.fromEntries(new FormData(e.target));
+    b.price = Number(b.price); b.stock = Number(b.stock||0);
+    await api('/products', { method:'POST', body: JSON.stringify(b) });
+    toast('Product added'); route('products');
+  };
+  el.querySelectorAll('button[data-adj]').forEach(btn => btn.onclick = async () => {
+    const id = btn.dataset.adj;
+    const val = el.querySelector(`.adj[data-id="${id}"]`).value;
+    const change = parseFloat(val);
+    if (!change) return toast('Enter +N or -N', true);
+    await api(`/products/${id}/adjust`, { method:'POST', body: JSON.stringify({ change, reason:'RESTOCK' }) });
+    toast('Stock updated'); route('products');
+  });
+};
+
+views.customers = async (el) => {
+  const { items } = await api('/customers');
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">Customers</h2>
+      <form id="c-form" class="grid3" style="margin-bottom:12px">
+        <div><label>Name</label><input name="name" required /></div>
+        <div><label>Phone</label><input name="phone" placeholder="+91..." required /></div>
+        <div><label>Credit limit</label><input name="creditLimit" type="number" value="0" /></div>
+        <div style="grid-column: span 3; display:flex; justify-content:flex-end">
+          <button class="primary">Add customer</button>
+        </div>
+      </form>
+      <table><thead><tr><th>Name</th><th>Phone</th><th>Credit balance</th><th>Credit limit</th><th></th></tr></thead>
+      <tbody>${items.map(c=>`
+        <tr><td>${c.name}</td><td>${c.phone}</td><td>${rupee(c.creditBalance)}</td><td>${rupee(c.creditLimit)}</td>
+        <td><input class="set" data-id="${c.id}" placeholder="amount" style="width:100px" />
+        <button class="ghost" data-settle="${c.id}">Settle</button></td></tr>`).join('')}
+      </tbody></table>
+    </div>`;
+  document.getElementById('c-form').onsubmit = async e => {
+    e.preventDefault();
+    const b = Object.fromEntries(new FormData(e.target));
+    b.creditLimit = Number(b.creditLimit||0);
+    await api('/customers', { method:'POST', body: JSON.stringify(b) });
+    toast('Customer added'); route('customers');
+  };
+  el.querySelectorAll('button[data-settle]').forEach(btn => btn.onclick = async () => {
+    const id = btn.dataset.settle;
+    const amt = parseFloat(el.querySelector(`.set[data-id="${id}"]`).value);
+    if (!amt) return;
+    await api(`/customers/${id}/settle`, { method:'POST', body: JSON.stringify({ amount: amt }) });
+    toast('Credit settled'); route('customers');
+  });
+};
+
+views.orders = async (el) => {
+  const status = localStorage.getItem('order_filter') || '';
+  const { items } = await api(`/orders${status?`?status=${status}`:''}`);
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">Orders</h2>
+      <div class="row" style="margin-bottom:10px">
+        <select id="filter">
+          <option value="">All</option>
+          ${['NEW','ACCEPTED','PACKED','OUT_FOR_DELIVERY','DELIVERED','CANCELLED','REJECTED']
+            .map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <table><thead><tr><th>#</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Payment</th><th></th></tr></thead>
+      <tbody>${items.map(o=>`
+        <tr><td>${o.orderNumber}</td>
+        <td>${o.Customer?.name || '-'}</td>
+        <td>${o.items?.length || 0}</td>
+        <td>${rupee(o.totalAmount)}</td>
+        <td><span class="pill ${o.status}">${o.status}</span></td>
+        <td>${o.paymentMethod} / ${o.paymentStatus}</td>
+        <td>${nextActions(o)}</td></tr>`).join('') || '<tr><td colspan=7 class=muted>No orders</td></tr>'}
+      </tbody></table>
+    </div>`;
+  document.getElementById('filter').onchange = (e) => {
+    localStorage.setItem('order_filter', e.target.value); route('orders');
+  };
+  el.querySelectorAll('button[data-status]').forEach(b => b.onclick = async () => {
+    await api(`/orders/${b.dataset.id}/status`, {
+      method:'PATCH', body: JSON.stringify({ status: b.dataset.status })
+    });
+    toast('Order updated'); route('orders');
+  });
+};
+
+function nextActions(o) {
+  const trans = {
+    NEW:['ACCEPTED','REJECTED'], ACCEPTED:['PACKED','CANCELLED'],
+    PACKED:['OUT_FOR_DELIVERY','CANCELLED'], OUT_FOR_DELIVERY:['DELIVERED','CANCELLED'],
+  };
+  return (trans[o.status]||[]).map(s =>
+    `<button class="ghost" data-id="${o.id}" data-status="${s}">${s.replace('_',' ')}</button>`).join(' ');
+}
+
+views['new-order'] = async (el) => {
+  const [prods, custs] = await Promise.all([api('/products'), api('/customers')]);
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">New Order</h2>
+      <div class="grid2">
+        <div>
+          <label>Customer (optional)</label>
+          <select id="cust"><option value="">-- walk-in --</option>
+            ${custs.items.map(c=>`<option value="${c.id}">${c.name} (${c.phone})</option>`).join('')}
+          </select>
+          <label style="margin-top:8px">Payment method</label>
+          <select id="pay">
+            <option value="CASH">Cash</option><option value="UPI">UPI</option>
+            <option value="CARD">Card</option><option value="CREDIT">Credit (udhaar)</option>
+          </select>
+          <label style="margin-top:8px">Delivery</label>
+          <select id="dtype"><option value="PICKUP">Pickup</option><option value="DELIVERY">Home delivery</option></select>
+          <label style="margin-top:8px">Delivery charge</label>
+          <input id="dch" type="number" value="0" />
+        </div>
+        <div>
+          <label>Add item</label>
+          <select id="prod">
+            <option value="">-- select product --</option>
+            ${prods.items.map(p=>`<option value="${p.id}" data-price="${p.price}" data-name="${p.name}" data-unit="${p.unit}">${p.name} — ${rupee(p.price)}/${p.unit} (stock ${p.stock})</option>`).join('')}
+          </select>
+          <div id="cart" style="margin-top:10px"></div>
+          <div id="total" style="margin-top:10px; font-size:18px; font-weight:700">Total: ₹0</div>
+          <button class="primary" id="place" style="margin-top:10px; width:100%">Place order</button>
+        </div>
+      </div>
+    </div>`;
+
+  const cart = [];
+  const render = () => {
+    document.getElementById('cart').innerHTML = cart.map((i,idx)=>`
+      <div class="cart-row">
+        <div>${i.name} <span class="muted">(${rupee(i.price)}/${i.unit})</span></div>
+        <input type="number" step="0.001" value="${i.quantity}" data-i="${idx}" class="qty" />
+        <button class="danger" data-rm="${idx}">×</button>
+      </div>`).join('') || '<div class="muted">No items yet</div>';
+    const sub = cart.reduce((s,i)=>s + i.price*i.quantity, 0);
+    const dch = Number(document.getElementById('dch').value||0);
+    document.getElementById('total').textContent = `Total: ${rupee(sub + dch)}`;
+    document.querySelectorAll('.qty').forEach(q => q.oninput = () => {
+      cart[q.dataset.i].quantity = parseFloat(q.value)||0; render();
+    });
+    document.querySelectorAll('button[data-rm]').forEach(b => b.onclick = () => {
+      cart.splice(Number(b.dataset.rm),1); render();
+    });
+  };
+  document.getElementById('dch').oninput = render;
+  document.getElementById('prod').onchange = (e) => {
+    const o = e.target.selectedOptions[0]; if (!o || !o.value) return;
+    cart.push({ productId:o.value, name:o.dataset.name, unit:o.dataset.unit, price:Number(o.dataset.price), quantity:1 });
+    e.target.value=''; render();
+  };
+  render();
+  document.getElementById('place').onclick = async () => {
+    if (!cart.length) return toast('Add items first', true);
+    const body = {
+      customerId: document.getElementById('cust').value || null,
+      paymentMethod: document.getElementById('pay').value,
+      deliveryType: document.getElementById('dtype').value,
+      deliveryCharge: Number(document.getElementById('dch').value||0),
+      items: cart.map(i => ({ productId:i.productId, quantity:i.quantity, price:i.price })),
+    };
+    try {
+      const o = await api('/orders', { method:'POST', body: JSON.stringify(body) });
+      toast(`Order ${o.orderNumber} placed ✓`);
+      route('orders');
+    } catch {}
+  };
+};
+
+views.deliveries = async (el) => {
+  const { items } = await api('/deliveries');
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">Deliveries</h2>
+      <p class="muted">Assign a delivery from the Orders view (coming soon inline). This list shows active deliveries.</p>
+      <table><thead><tr><th>Order</th><th>Delivery boy</th><th>Status</th><th>Assigned</th><th>Delivered</th><th></th></tr></thead>
+      <tbody>${items.map(d=>`
+        <tr><td>${d.Order?.orderNumber||'-'}</td><td>${d.deliveryBoyName}</td>
+        <td><span class="pill">${d.status}</span></td>
+        <td>${dtf(d.assignedAt)}</td><td>${dtf(d.deliveredAt)}</td>
+        <td>${['ASSIGNED','PICKED','OUT_FOR_DELIVERY'].includes(d.status) ?
+          `<button class="ghost" data-deliver="${d.id}">Mark delivered</button>` : ''}</td></tr>`).join('')
+        || '<tr><td colspan=6 class=muted>No deliveries</td></tr>'}
+      </tbody></table>
+    </div>`;
+  el.querySelectorAll('button[data-deliver]').forEach(b => b.onclick = async () => {
+    await api(`/deliveries/${b.dataset.deliver}/status`, {
+      method:'PATCH', body: JSON.stringify({ status:'DELIVERED' })
+    });
+    toast('Marked delivered'); route('deliveries');
+  });
+};
+
+views.insights = async (el) => {
+  try {
+    const [top, reorder, freq] = await Promise.all([
+      api('/insights/top-products?days=30'),
+      api('/insights/reorder-list'),
+      api('/insights/customer-frequency?days=30'),
+    ]);
+    el.innerHTML = `
+      <div class="grid2">
+        <div class="card"><h3>Top products (30d)</h3>
+        <table><thead><tr><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+        <tbody>${top.map(p=>`<tr><td>${p.productName}</td><td>${p.totalQty}</td><td>${rupee(p.totalRevenue)}</td></tr>`).join('')||'<tr><td colspan=3 class=muted>No data</td></tr>'}</tbody></table></div>
+        <div class="card"><h3>Suggested reorders</h3>
+        <table><thead><tr><th>Product</th><th>Sold</th><th>Stock</th></tr></thead>
+        <tbody>${reorder.map(r=>`<tr><td>${r.Product?.name}</td><td>${r.soldQty}</td><td>${r.Product?.stock} ${r.Product?.unit}</td></tr>`).join('')||'<tr><td colspan=3 class=muted>No suggestions</td></tr>'}</tbody></table></div>
+      </div>
+      <div class="card"><h3>Top customers (30d)</h3>
+      <table><thead><tr><th>Customer</th><th>Phone</th><th>Orders</th><th>Spend</th></tr></thead>
+      <tbody>${freq.map(f=>`<tr><td>${f.Customer?.name||'-'}</td><td>${f.Customer?.phone||'-'}</td><td>${f.orderCount}</td><td>${rupee(f.totalSpend)}</td></tr>`).join('')||'<tr><td colspan=4 class=muted>No data</td></tr>'}</tbody></table></div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="card">Analytics requires GROWTH or PREMIUM plan. <a href="#" id="go-sub">Upgrade →</a></div>`;
+    document.getElementById('go-sub').onclick = (e)=>{e.preventDefault(); route('subscription');};
+  }
+};
+
+views.subscription = async (el) => {
+  const [plans, mine] = await Promise.all([api('/subscription/plans'), api('/subscription/me')]);
+  el.innerHTML = `
+    <div class="card">
+      <h2 style="margin:0 0 10px">Your plan</h2>
+      <p><span class="pill">${mine.plan.plan}</span> — status <b>${mine.status}</b></p>
+      ${mine.trialEndsAt ? `<p class="muted">Trial ends: ${dtf(mine.trialEndsAt)}</p>`:''}
+      ${mine.subscriptionEndsAt ? `<p class="muted">Renewal: ${dtf(mine.subscriptionEndsAt)}</p>`:''}
+    </div>
+    <div class="grid3">
+      ${plans.map(p=>`
+        <div class="card">
+          <h3 style="margin:0">${p.plan}</h3>
+          <div style="font-size:26px; font-weight:700; margin:8px 0">${p.priceInr===0?'Free':rupee(p.priceInr)+' /mo'}</div>
+          <ul style="padding-left:18px; color:var(--muted); font-size:13px">
+            <li>Max products: ${p.maxProducts===-1?'Unlimited':p.maxProducts}</li>
+            <li>Orders/mo: ${p.maxOrdersPerMonth===-1?'Unlimited':p.maxOrdersPerMonth}</li>
+            <li>WhatsApp: ${p.whatsapp?'✓':'—'}</li>
+            <li>Analytics: ${p.analytics?'✓':'—'}</li>
+          </ul>
+          <button class="primary" data-plan="${p.plan}" style="width:100%">Switch</button>
+        </div>`).join('')}
+    </div>`;
+  el.querySelectorAll('button[data-plan]').forEach(b => b.onclick = async () => {
+    try {
+      const out = await api('/subscription/upgrade', { method:'POST', body: JSON.stringify({ plan: b.dataset.plan }) });
+      if (out.free) { toast('Plan updated'); route('subscription'); }
+      else toast(`Razorpay order created: ${out.checkout?.razorpayOrderId}. Configure keys to complete payment.`);
+    } catch {}
+  });
+};
+
+// ---------- Boot ----------
+if (TOKEN && STORE && USER) showApp(); else showAuth();
+</script>
+</body>
+</html>

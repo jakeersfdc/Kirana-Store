@@ -1,0 +1,14 @@
+node_modules/
+.env
+.env.production
+.env.local
+.env.*.local
+*.log
+logs/
+coverage/
+dist/
+data/
+*.sqlite
+*.sqlite-journal
+.DS_Store
+.pm2/

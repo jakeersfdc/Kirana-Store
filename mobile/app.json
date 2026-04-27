@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Kirana",
+    "slug": "kirana-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#0c831f",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.kirana.mobile" },
+    "android": {
+      "package": "com.kirana.mobile",
+      "adaptiveIcon": { "backgroundColor": "#0c831f" }
+    },
+    "web": { "bundler": "metro" },
+    "extra": {
+      "API_URL": "http://192.168.1.9:4000"
+    }
+  }
+}
